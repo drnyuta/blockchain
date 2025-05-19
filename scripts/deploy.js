@@ -1,21 +1,27 @@
-const { ethers, upgrades } = require("hardhat");
+const fs = require("fs");
+const path = require("path");
+const { ethers } = require("hardhat");
 
 async function main() {
-  const [deployer] = await ethers.getSigners();
-  console.log("Deploying contracts with account:", deployer.address);
+  const [owner1, owner2] = await ethers.getSigners();
 
-  const MyTokenV1 = await ethers.getContractFactory("MyTokenV1");
-
-  const myTokenProxy = await upgrades.deployProxy(
-    MyTokenV1,
-    [ethers.parseUnits("1000000", 18)],
-    {
-      initializer: "initialize",
-    }
+  const MultiSigWallet = await ethers.getContractFactory("MultiSigWallet");
+  const wallet = await MultiSigWallet.deploy(
+    [owner1.address, owner2.address], // владельцы
+    2 // минимальное количество подтверждений
   );
+  await wallet.waitForDeployment();
 
-  await myTokenProxy.waitForDeployment();
-  console.log("MyToken Proxy deployed to:", await myTokenProxy.getAddress());
+  const deployedAddress = await wallet.getAddress();
+  console.log("Deployed to:", deployedAddress);
+
+  // Сохраняем адрес в файл
+  const addressesPath = path.join(__dirname, "../deployedAddress.json");
+  fs.writeFileSync(
+    addressesPath,
+    JSON.stringify({ MultiSigWallet: deployedAddress }, null, 2)
+  );
+  console.log("Address saved to deployedAddress.json");
 }
 
 main().catch((error) => {

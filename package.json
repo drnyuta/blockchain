@@ -5,7 +5,8 @@
   "scripts": {
     "test": "npx hardhat test",
     "start": "npx hardhat node",
-    "deploy": "npx hardhat run scripts/deploy.js --network localhost"
+    "deploy": "npx hardhat run scripts/deploy.js --network localhost",
+    "interact": "npx hardhat run scripts/interact.js --network localhost"
   },
   "keywords": [],
   "author": "",
